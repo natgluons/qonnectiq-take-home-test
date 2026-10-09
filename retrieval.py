@@ -98,3 +98,13 @@ def load_corpus(folder: str | Path = "parsed_data") -> list[dict]:
         if parsed.get("document_type") in {"DDR", "DGOS", "GLOSSARY"}:
             docs.append(parsed)
     return docs
+
+
+def _evidence(doc: dict, section: str, text: str, page: int = 1) -> dict:
+    entry = {
+        "source_file": doc["source_file"], "page": page, "section": section,
+        "report_date": doc.get("report_date"), "report_number": doc.get("report_number"),
+        "document_type": doc["document_type"], "text": text,
+    }
+    entry["id"] = sha256(f"{entry['source_file']}\0{page}\0{section}\0{text}".encode()).hexdigest()[:24]
+    return entry
