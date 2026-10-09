@@ -93,3 +93,7 @@ def chunk(page_text: str, max_chars: int = 1500, overlap: int = 180) -> list[str
                 break
             start = max(start + 1, end - overlap)
     return out
+
+
+def segment(section: str, text: str, page: int = 1) -> dict[str, Any]:
+    return {"section": section, "page": page, "text": clean(text)}
