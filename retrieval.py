@@ -108,3 +108,33 @@ def _evidence(doc: dict, section: str, text: str, page: int = 1) -> dict:
     }
     entry["id"] = sha256(f"{entry['source_file']}\0{page}\0{section}\0{text}".encode()).hexdigest()[:24]
     return entry
+
+
+def build_records(corpus: list[dict]) -> list[dict]:
+    records = []
+    for doc in corpus:
+        if doc.get("document_type") == "GLOSSARY":
+            for term in doc.get("terms", []):
+                records.append(_evidence(doc, "glossary:" + term["term"],
+                                         f"{term['term']}: {term['meaning']}"))
+            continue
+        for key, display in FIELDS.items():
+            value = doc.get(key)
+            if value is not None and value != "":
+                suffix = " hr" if key.endswith("hours") else (" ppg" if key == "mud_weight_ppg" else "")
+                records.append(_evidence(doc, key, f"{display}: {value}{suffix}"))
+        for section in doc.get("sections", []):
+            text = section.get("text", "")
+            if not text:
+                continue
+            # Keep indexed chunks bounded so a giant PDF page doesn't drown a
+            # short and precise record. Source attribution remains page-based.
+            if len(text) <= 1400:
+                records.append(_evidence(doc, section["section"], text, section.get("page", 1)))
+            else:
+                for idx, part in enumerate(_slices(text)):
+                    records.append(_evidence(doc, f"{section['section']}_part_{idx+1}",
+                                             part, section.get("page", 1)))
+        if doc.get("npt_raw"):
+            records.append(_evidence(doc, "npt_details", "Daily NPT: " + doc["npt_raw"]))
+    return records
