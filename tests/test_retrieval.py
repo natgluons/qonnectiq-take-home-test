@@ -21,3 +21,7 @@ CORPUS = [
 ]
 
 
+def test_location():
+    hits = retrieve("Dimana letak lokasi sumur?", CORPUS)
+    assert hits[0]["section"] == "country"
+    assert "MALAYSIA" in hits[0]["text"]
