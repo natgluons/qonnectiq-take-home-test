@@ -39,3 +39,11 @@ def build_embedding_cache(output_dir: Path) -> int:
     temp.write_text(json.dumps({"model": MODEL, "vectors": vectors}), encoding="utf8")
     temp.replace(path)
     return len(missing)
+
+
+def load_embedding_cache(folder: Path) -> dict:
+    try:
+        data = json.loads((folder / "embeddings.json").read_text(encoding="utf8"))
+        return data.get("vectors", {}) if data.get("model") == MODEL else {}
+    except (OSError, ValueError):
+        return {}
