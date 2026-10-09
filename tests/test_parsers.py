@@ -24,3 +24,32 @@ def test_glossary_docx_table(tmp_path):
     assert len(result["terms"]) == 2
     assert result["terms"][0]["term"] == "NPT"
     assert result["terms"][1]["needs_confirmation"] is True
+
+
+def test_synthetic_dgos_without_specific_filename(tmp_path):
+    p = tmp_path / "arbitrary_filename.pdf"
+    doc = fitz.open()
+    page = doc.new_page(width=972, height=1667)
+    for x, y, msg in [
+        (20, 46, "Current Date : 12-10-2026"),
+        (330, 65, "DAILY GEOLOGICAL OPERATIONS SUMMARY"),
+        (20, 125, "WELL NAME : TEST-1"),
+        (20, 145, "COUNTRY : MYS | MALAYSIA"),
+        (900, 95, "73"),
+        (20, 250, "Rig up wireline."),
+        (20, 310, "Finished drilling."),
+        (20, 395, "Perform WL Run #1: TEST."),
+        (502, 492, "D12"),
+        (825, 492, "2950.00"),
+        (720, 552, "14.1"),
+        (744, 552, "SBM"),
+    ]:
+        page.insert_text((x,y), msg, fontsize=10)
+    doc.save(p)
+    doc.close()
+    assert classify_pdf(p) == "DGOS"
+    result = parse_dgos(p)
+    assert result["report_date"] == "2026-10-12"
+    assert result["well_name"] == "TEST-1"
+    assert result["current_depth_mddf"] == 2950
+    assert "WL Run #1" in result["next_24h_operation"]
