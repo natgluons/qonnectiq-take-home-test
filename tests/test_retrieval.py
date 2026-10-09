@@ -42,3 +42,9 @@ def test_planned_wireline():
 def test_glossary():
     hits = retrieve("What does BHA mean?", CORPUS)
     assert hits[0]["section"] == "glossary:BHA"
+
+
+def test_out_of_scope_without_calling_openai():
+    answer_text, sources = answer("Bagaimana cara memasak nasi goreng?", CORPUS, api_key="test-not-used")
+    assert answer_text == REFUSAL
+    assert sources == []
