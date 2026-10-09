@@ -152,3 +152,27 @@ def _slices(text: str, size: int = 1250, overlap: int = 150):
         if end == len(text):
             return
         start = max(start + 1, end - overlap)
+
+
+def _mentioned_date(question: str) -> str | None:
+    iso = re.search(r"\b(\d{4})-(\d\d)-(\d\d)\b", question)
+    if iso:
+        return iso.group()
+    day_first = re.search(r"\b(\d{1,2})[/-](\d{1,2})[/-](\d{4})\b", question)
+    if day_first:
+        try:
+            return datetime.strptime(day_first.group(), "%d/%m/%Y" if "/" in day_first.group() else "%d-%m-%Y").date().isoformat()
+        except ValueError:
+            return None
+    months = "january february march april may june july august september october november december".split()
+    for i, month in enumerate(months, 1):
+        for name in (month, month[:3]):
+            p1 = re.search(rf"\b{name}\s+(\d{{1,2}})(?:,?\s+(\d{{4}}))?\b", question, re.I)
+            p2 = re.search(rf"\b(\d{{1,2}})\s+{name}(?:\s+(\d{{4}}))?\b", question, re.I)
+            m = p1 or p2
+            if m:
+                try:
+                    return datetime(int(m.group(2) or 2026), i, int(m.group(1))).date().isoformat()
+                except ValueError:
+                    return None
+    return None
