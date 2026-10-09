@@ -55,3 +55,8 @@ def test_known_answers_do_not_require_openai_key():
     assert answer("Berapa Total NPT sumur?", CORPUS)[0] == "1.5 hr"
     assert "WL Run #1: PEX-QAIT" in answer("Wireline run apa yang direncanakan?", CORPUS)[0]
     assert "Bottom Hole Assembly" in answer("What does BHA mean?", CORPUS)[0]
+
+
+def test_no_accidental_short_glossary_match():
+    assert not retrieve("Who won the world cup in 2014?", CORPUS)
+    assert not retrieve("What is the weather forecast for tomorrow?", CORPUS)
