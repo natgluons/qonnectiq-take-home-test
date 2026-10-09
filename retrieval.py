@@ -185,3 +185,21 @@ def _scope(question: str, corpus: list[dict]) -> tuple[str | None, int | None, s
     wells = sorted({x["well_name"] for x in corpus if x.get("well_name")}, key=len, reverse=True)
     name = next((well for well in wells if well.lower() in question.lower()), None)
     return date, int(number.group(1)) if number else None, name
+
+
+def _bm25(query: list[str], evidence: list[dict]) -> list[float]:
+    tf = [Counter(tokenize(e["text"])) for e in evidence]
+    lengths = [sum(x.values()) for x in tf]
+    average_length = sum(lengths) / max(len(tf), 1)
+    df = Counter(t for counter in tf for t in counter)
+    n = len(tf)
+    scores = []
+    for counts, length in zip(tf, lengths):
+        score = 0.0
+        for word in set(query):
+            count = counts.get(word, 0)
+            if count:
+                idf = math.log(1 + (n - df[word] + .5) / (df[word] + .5))
+                score += idf * (count * 2.2) / (count + 1.2 * (.25 + .75 * length / max(average_length, 1)))
+        scores.append(score)
+    return scores
