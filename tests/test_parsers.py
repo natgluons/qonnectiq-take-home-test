@@ -95,3 +95,18 @@ def test_one_command_ingestion(tmp_path):
     assert not result["errors"]
     assert len(result["files_created"]) == 1
     assert (output / "Glossaries.json").is_file()
+
+
+@pytest.mark.parametrize("suffix,report_type", [
+    ("BARAKUDA-1_DGOS_72_20260829.pdf", "DGOS"),
+    ("BARAKUDA-1_DGOS_84_20260910.pdf", "DGOS"),
+    ("NAGA-2_BARAKUDA-1_DDR_32_19_07_2026_Drill_17_5in_x_20in_Hole.pdf", "DDR"),
+])
+def test_optional_original_files(suffix, report_type):
+    p = Path("datasets") / suffix
+    if not p.exists():
+        pytest.skip("Private assessment datasets are not bundled in public repo")
+    parser = parse_dgos if report_type == "DGOS" else parse_ddr
+    result = parser(p)
+    assert result["document_type"] == report_type
+    assert result["well_name"] == "BARAKUDA-1"
