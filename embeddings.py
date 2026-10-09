@@ -47,3 +47,9 @@ def load_embedding_cache(folder: Path) -> dict:
         return data.get("vectors", {}) if data.get("model") == MODEL else {}
     except (OSError, ValueError):
         return {}
+
+
+def embed_question(question: str) -> list[float]:
+    from openai import OpenAI
+    client = OpenAI(timeout=25, max_retries=1)
+    return client.embeddings.create(model=MODEL, input=question).data[0].embedding
