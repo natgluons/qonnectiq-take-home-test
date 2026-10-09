@@ -35,3 +35,24 @@ def javascript():
 def health():
     corpus = load_corpus(os.getenv("PARSED_DATA_DIR", "parsed_data"))
     return {"documents": len(corpus), "ready": bool(corpus)}
+
+
+@app.post("/api/chat")
+def chat(request: ChatRequest):
+    # Reload the JSON each request: a newly ingested PDF is immediately searchable
+    # without a server restart or an extra database / indexing service.
+    corpus = load_corpus(os.getenv("PARSED_DATA_DIR", "parsed_data"))
+    if not corpus:
+        raise HTTPException(503, "No documents indexed. Run: python ingest.py")
+    try:
+        response, sources = answer(request.question, corpus)
+    except Exception as exc:
+        # Never include the provider's raw error: it may reveal credentials.
+        raise HTTPException(502, "Model API unavailable. Check OPENAI_API_KEY and model access.") from exc
+    return {
+        "answer": response,
+        "sources": [
+            {k: s.get(k) for k in ("source_file", "page", "section", "report_date", "score")}
+            for s in sources
+        ],
+    }
