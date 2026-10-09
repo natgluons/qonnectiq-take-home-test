@@ -1,0 +1,22 @@
+# Credentials
+.env
+.env.*
+!.env.example
+
+# Private assessment inputs and generated data
+[Dd]atasets/
+Glossaries.docx
+Instruction.docx
+parsed_data/
+qonnectiq-take-home-test.zip
+
+# Python
+.venv/
+venv/
+__pycache__/
+.pytest_cache/
+*.py[cod]
+
+# Local files
+.DS_Store
+*.log
