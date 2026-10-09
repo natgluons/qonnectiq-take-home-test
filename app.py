@@ -24,3 +24,8 @@ class ChatRequest(BaseModel):
 @app.get("/")
 def home():
     return FileResponse(ROOT / "web" / "index.html")
+
+
+@app.get("/app.js")
+def javascript():
+    return FileResponse(ROOT / "web" / "app.js", media_type="application/javascript")
