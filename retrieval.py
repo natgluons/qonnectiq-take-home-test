@@ -86,3 +86,15 @@ def tokenize(value: str) -> list[str]:
 def query_tokens(value: str) -> list[str]:
     tokens = tokenize(value)
     return tokens + [word for token in tokens for word in ALIASES.get(token, ())]
+
+
+def load_corpus(folder: str | Path = "parsed_data") -> list[dict]:
+    docs = []
+    for path in sorted(Path(folder).glob("*.json")):
+        try:
+            parsed = json.loads(path.read_text(encoding="utf8"))
+        except (OSError, ValueError):
+            continue
+        if parsed.get("document_type") in {"DDR", "DGOS", "GLOSSARY"}:
+            docs.append(parsed)
+    return docs
