@@ -39,3 +39,10 @@ def date_iso(text: str | None) -> str | None:
 def search(text: str, pattern: str, flags: int = re.I | re.S) -> str | None:
     found = re.search(pattern, text, flags)
     return clean(found.group(1)) if found else None
+
+
+def normalized_pages(pdf: fitz.Document) -> list[dict[str, Any]]:
+    return [
+        {"page": i + 1, "text": pdf[i].get_text("text", sort=True)}
+        for i in range(len(pdf))
+    ]
