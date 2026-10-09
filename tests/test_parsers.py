@@ -53,3 +53,30 @@ def test_synthetic_dgos_without_specific_filename(tmp_path):
     assert result["well_name"] == "TEST-1"
     assert result["current_depth_mddf"] == 2950
     assert "WL Run #1" in result["next_24h_operation"]
+
+
+def test_synthetic_ddr(tmp_path):
+    p = tmp_path / "report.pdf"
+    doc = fitz.open()
+    page = doc.new_page()
+    for i, msg in enumerate([
+        "Daily Operation Report",
+        "Well: DEMO-1    Report no.: 5    Report date: 12/10/2026",
+        "Rig Name: TEST-RIG   Block: PMXXX   Water Depth: 55.00 m",
+        "Daily NPT : 1.50 hr   Cumm NPT : 3.50 hr",
+        "Daily Cost : 120.00    Cumm Cost : 340.00",
+        "Current status : Testing tools.",
+        "24 hr summary : Did a test.",
+        "24 hr forecast : Repeat the test.",
+        "Incident / Accident : No accidents.",
+        "Remarks : none",
+    ]):
+        page.insert_text((25, 50 + 28*i), msg, fontsize=10)
+    doc.save(p)
+    doc.close()
+    assert classify_pdf(p) == "DDR"
+    parsed = parse_ddr(p)
+    assert parsed["well_name"] == "DEMO-1"
+    assert parsed["report_date"] == "2026-10-12"
+    assert parsed["cumulative_npt_hours"] == 3.5
+    assert parsed["daily_cost_usd"] == 120.0
