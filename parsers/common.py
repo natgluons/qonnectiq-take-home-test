@@ -71,3 +71,25 @@ def unique_lines(lines: list[str], ignored: set[str] | None = None) -> str:
 def fields_chunk(data: dict, fields: list[str] | None = None) -> str:
     fields = fields or list(data)
     return "; ".join(f"{k}: {data[k]}" for k in fields if data.get(k) is not None)
+
+
+def chunk(page_text: str, max_chars: int = 1500, overlap: int = 180) -> list[str]:
+    """Break long reports into answerable spans; preserve original page association."""
+    paragraphs = [clean(p) for p in re.split(r"\n\s*\n", page_text) if clean(p)]
+    out: list[str] = []
+    for paragraph in paragraphs:
+        if len(paragraph) <= max_chars:
+            out.append(paragraph)
+            continue
+        start = 0
+        while start < len(paragraph):
+            end = min(len(paragraph), start + max_chars)
+            if end < len(paragraph):
+                split_at = paragraph.rfind(" ", start + max_chars // 2, end)
+                if split_at > start:
+                    end = split_at
+            out.append(paragraph[start:end].strip())
+            if end == len(paragraph):
+                break
+            start = max(start + 1, end - overlap)
+    return out
