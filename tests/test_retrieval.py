@@ -60,3 +60,18 @@ def test_known_answers_do_not_require_openai_key():
 def test_no_accidental_short_glossary_match():
     assert not retrieve("Who won the world cup in 2014?", CORPUS)
     assert not retrieve("What is the weather forecast for tomorrow?", CORPUS)
+
+
+def test_report_number_restricts_retrieval():
+    expanded = [*CORPUS, {
+        "document_type": "DGOS", "source_file": "newer.pdf", "report_date": "2026-09-10",
+        "report_number": 84, "well_name": "DEMO-1", "country": "MALAYSIA",
+        "npt_total_hours": 2.25, "sections": [
+            {"section": "remarks", "page": 1, "text": "Acquired 9 pretest points."}
+        ],
+    }]
+    hits = retrieve("Berapa total NPT report 84?", expanded)
+    assert hits[0]["section"] == "npt_total_hours"
+    assert hits[0]["report_number"] == 84
+    assert answer("Berapa total NPT report 84?", expanded)[0].startswith("2.25 hr")
+    assert retrieve("Where is the well in report 999?", expanded) == []
