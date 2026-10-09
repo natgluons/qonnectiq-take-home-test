@@ -53,3 +53,16 @@ def clipped_lines(page: fitz.Page, x0: float, y0: float, x1: float, y1: float) -
     rect = fitz.Rect(x0, y0, x1, y1)
     lines = [clean(x) for x in page.get_text("text", clip=rect, sort=False).splitlines()]
     return [x for x in lines if x]
+
+
+def unique_lines(lines: list[str], ignored: set[str] | None = None) -> str:
+    seen: set[str] = set()
+    result: list[str] = []
+    for line in lines:
+        if line.lower() in (ignored or set()):
+            continue
+        if line in seen:
+            continue
+        seen.add(line)
+        result.append(line)
+    return clean(" ".join(result))
