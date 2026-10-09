@@ -97,3 +97,15 @@ def chunk(page_text: str, max_chars: int = 1500, overlap: int = 180) -> list[str
 
 def segment(section: str, text: str, page: int = 1) -> dict[str, Any]:
     return {"section": section, "page": page, "text": clean(text)}
+
+
+def source_record(path: Path, report_type: str, pages: list[dict], **kwargs: Any) -> dict[str, Any]:
+    return {
+        "schema_version": 1,
+        "document_type": report_type,
+        "source_file": path.name,
+        "page_count": len(pages),
+        **kwargs,
+        "sections": [],
+        "pages": pages,
+    }
