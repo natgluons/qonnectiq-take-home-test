@@ -25,3 +25,9 @@ def test_location():
     hits = retrieve("Dimana letak lokasi sumur?", CORPUS)
     assert hits[0]["section"] == "country"
     assert "MALAYSIA" in hits[0]["text"]
+
+
+def test_total_npt():
+    hits = retrieve("Berapa Total NPT sumur?", CORPUS)
+    assert hits[0]["section"] == "cumulative_npt_hours"
+    assert "1.5" in hits[0]["text"]
