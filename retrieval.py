@@ -203,3 +203,95 @@ def _bm25(query: list[str], evidence: list[dict]) -> list[float]:
                 score += idf * (count * 2.2) / (count + 1.2 * (.25 + .75 * length / max(average_length, 1)))
         scores.append(score)
     return scores
+
+
+def retrieve(question: str, corpus: list[dict], limit: int = 6,
+             vectors: dict[str, list[float]] | None = None,
+             query_vector: list[float] | None = None) -> list[dict]:
+    """Find attributed evidence. Optional embeddings blend with lexical BM25.
+
+    Retrieval remains useful entirely offline; embeddings require no vector DB.
+    """
+    q = question.strip()
+    # No report contains evidence about future conditions relative to the user.
+    # This is not a general weather forecasting service.
+    if re.search(r"\b(tomorrow|besok|next week|minggu depan|hari ini|today|sekarang|right now)\b", q, re.I) and \
+            not re.search(r"\b(next 24|24 jam berikutnya)\b", q, re.I):
+        return []
+    tokens = query_tokens(q)
+    if not tokens:
+        return []
+    date, report_number, well_name = _scope(q, corpus)
+    evidence = [e for e in build_records(corpus)
+                if (date is None or e["report_date"] is None or e["report_date"] == date)
+                and (report_number is None or e["report_number"] is None or e["report_number"] == report_number)
+                and (well_name is None or e["document_type"] == "GLOSSARY"
+                     or any(d.get("source_file") == e["source_file"] and d.get("well_name") == well_name for d in corpus))]
+    glossary_intent = bool(GLOSSARY_INTENT.search(q)) and not (
+        (date is not None or report_number is not None) and
+        re.search(r"\b(npt|cost|depth|mud|report|laporan|biaya|kedalaman)\b", q, re.I)
+    )
+    for e in evidence:
+        if not e["section"].startswith("glossary:"):
+            continue
+        term = e["section"].split(":", 1)[1]
+        # A general question containing "in" or "at" is not a glossary query.
+        term_matched = re.search(r"(?<!\w)" + re.escape(term) + r"(?!\w)", q, re.I)
+        e["glossary_exact"] = bool(term_matched and glossary_intent)
+    scores = _bm25(tokens, evidence)
+    wants_npt = bool(re.search(r"\bnpt\b|non.productive|downtime", q, re.I))
+    wants_total = bool(re.search(r"\b(total|cumulative|cumm|kumulatif)\b", q, re.I))
+    wants_country = bool(re.search(r"\b(lokasi|location|country|negara|where|terletak|berada)\b", q, re.I))
+    planned_wl = bool(re.search(r"\b(wireline|wl)\b", q, re.I)) and bool(re.search(
+        r"\b(plan|planned|rencana|direncanakan|next|akan|forecast)\b", q, re.I))
+    # Try exact type-and-field routing first; the model should never guess which
+    # dated field a question about total NPT refers to.
+    for e, score in zip(evidence, scores):
+        field = e["section"]
+        boost = 0.0
+        if e.get("glossary_exact"):
+            boost = 70.0
+        elif field.startswith("glossary:"):
+            # Keep definitions out of operational searches, including tiny units.
+            score = 0 if not glossary_intent else score * .25
+        elif field == "country" and wants_country:
+            boost = 55.0
+        elif field == "cumulative_npt_hours" and wants_npt and wants_total:
+            boost = 70.0
+        elif field in ("daily_npt_hours", "npt_total_hours", "npt_details") and wants_npt and not wants_total:
+            boost = 35.0
+        elif field == "npt_total_hours" and wants_npt and wants_total and (date or report_number):
+            boost = 45.0
+        elif field == "current_depth_mddf" and re.search(r"\b(current|kedalaman|depth|dalam)\b", q, re.I):
+            boost = 20.0
+        elif field == "cumulative_cost_usd" and re.search(r"\b(total|cumulative|biaya|cost)\b", q, re.I):
+            boost = 15.0
+        elif field.startswith("next_24h_operation") and planned_wl and re.search(r"\bWL\s+Run|wireline", e["text"], re.I):
+            boost = 65.0
+        if field.startswith("full_report") or field.startswith("raw_report"):
+            score *= .40
+        e["score"] = score + boost
+    # True semantic re-ranking is optional. Require some lexical/domain evidence
+    # to avoid answering off-topic requests solely on cosine similarity.
+    if vectors and query_vector:
+        query_norm = math.sqrt(sum(x*x for x in query_vector)) or 1.0
+        for e in evidence:
+            v = vectors.get(e["id"])
+            if v and len(v) == len(query_vector):
+                denom = query_norm * (math.sqrt(sum(x*x for x in v)) or 1.0)
+                similarity = sum(a*b for a,b in zip(v,query_vector)) / denom
+                if similarity > .30 and e["score"] > 0:
+                    e["score"] += max(0, (similarity - .30)) * 13
+    evidence = [e for e in evidence if e["score"] > 1.5 and
+                (not e["section"].startswith("glossary:") or e.get("glossary_exact"))]
+    evidence.sort(key=lambda e: e["score"], reverse=True)
+    seen, ranked = set(), []
+    for e in evidence:
+        identity = (e["source_file"], e["page"], e["section"])
+        if identity in seen:
+            continue
+        seen.add(identity)
+        ranked.append(e)
+        if len(ranked) == limit:
+            break
+    return ranked
