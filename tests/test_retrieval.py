@@ -48,3 +48,10 @@ def test_out_of_scope_without_calling_openai():
     answer_text, sources = answer("Bagaimana cara memasak nasi goreng?", CORPUS, api_key="test-not-used")
     assert answer_text == REFUSAL
     assert sources == []
+
+
+def test_known_answers_do_not_require_openai_key():
+    assert answer("Dimana letak lokasi sumur?", CORPUS)[0] == "MALAYSIA"
+    assert answer("Berapa Total NPT sumur?", CORPUS)[0] == "1.5 hr"
+    assert "WL Run #1: PEX-QAIT" in answer("Wireline run apa yang direncanakan?", CORPUS)[0]
+    assert "Bottom Hole Assembly" in answer("What does BHA mean?", CORPUS)[0]
