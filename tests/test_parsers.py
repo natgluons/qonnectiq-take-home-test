@@ -80,3 +80,18 @@ def test_synthetic_ddr(tmp_path):
     assert parsed["report_date"] == "2026-10-12"
     assert parsed["cumulative_npt_hours"] == 3.5
     assert parsed["daily_cost_usd"] == 120.0
+
+
+def test_one_command_ingestion(tmp_path):
+    inputs = tmp_path / "datasets"
+    inputs.mkdir()
+    doc = Document()
+    table = doc.add_table(rows=1, cols=2)
+    table.add_row().cells[0].text = "NPT"
+    table.rows[1].cells[1].text = "Non Productive Time"
+    doc.save(inputs / "Glossaries.docx")
+    output = tmp_path / "parsed_data"
+    result = run(inputs, output)
+    assert not result["errors"]
+    assert len(result["files_created"]) == 1
+    assert (output / "Glossaries.json").is_file()
