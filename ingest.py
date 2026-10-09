@@ -28,3 +28,9 @@ def classify_pdf(path: Path) -> str:
     if "DAILY OPERATION REPORT" in first or "DAILY DRILLING REPORT" in first:
         return "DDR"
     raise ValueError("Unsupported PDF report layout (expected DGOS or DDR)")
+
+
+def output_name(path: Path, root: Path) -> str:
+    # Avoid collisions between same-named PDFs in different input subfolders.
+    relative = str(path.relative_to(root).with_suffix(""))
+    return re.sub(r"[^\w-]+", "_", relative).strip("_") + ".json"
