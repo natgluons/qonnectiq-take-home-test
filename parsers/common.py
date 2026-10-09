@@ -34,3 +34,8 @@ def date_iso(text: str | None) -> str | None:
         except ValueError:
             continue
     return None
+
+
+def search(text: str, pattern: str, flags: int = re.I | re.S) -> str | None:
+    found = re.search(pattern, text, flags)
+    return clean(found.group(1)) if found else None
