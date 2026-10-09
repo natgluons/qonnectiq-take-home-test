@@ -138,3 +138,17 @@ def build_records(corpus: list[dict]) -> list[dict]:
         if doc.get("npt_raw"):
             records.append(_evidence(doc, "npt_details", "Daily NPT: " + doc["npt_raw"]))
     return records
+
+
+def _slices(text: str, size: int = 1250, overlap: int = 150):
+    start = 0
+    while start < len(text):
+        end = min(len(text), start + size)
+        if end < len(text):
+            last = text.rfind(" ", start + size // 2, end)
+            if last > start:
+                end = last
+        yield text[start:end]
+        if end == len(text):
+            return
+        start = max(start + 1, end - overlap)
