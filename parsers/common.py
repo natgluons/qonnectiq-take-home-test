@@ -23,3 +23,14 @@ def number(value: str | None) -> float | None:
         return float(value.replace(",", ""))
     except (ValueError, TypeError):
         return None
+
+
+def date_iso(text: str | None) -> str | None:
+    if not text:
+        return None
+    for fmt in ("%d-%m-%Y", "%d/%m/%Y", "%Y-%m-%d"):
+        try:
+            return datetime.strptime(text.strip(), fmt).date().isoformat()
+        except ValueError:
+            continue
+    return None
