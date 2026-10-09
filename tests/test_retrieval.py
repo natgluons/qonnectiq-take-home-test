@@ -75,3 +75,10 @@ def test_report_number_restricts_retrieval():
     assert hits[0]["report_number"] == 84
     assert answer("Berapa total NPT report 84?", expanded)[0].startswith("2.25 hr")
     assert retrieve("Where is the well in report 999?", expanded) == []
+
+
+def test_keyword_retrieval_on_technical_failure():
+    hits = retrieve("What happened to the underreamer?", CORPUS)
+    assert hits
+    assert hits[0]["document_type"] == "DDR"
+    assert "underreamer" in hits[0]["text"].lower()
