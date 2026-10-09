@@ -81,3 +81,8 @@ FIELDS = {
 def tokenize(value: str) -> list[str]:
     return [t for t in re.findall(r"[a-z0-9]+(?:[-_/][a-z0-9]+)*", value.casefold())
             if t not in STOP and len(t) > 1]
+
+
+def query_tokens(value: str) -> list[str]:
+    tokens = tokenize(value)
+    return tokens + [word for token in tokens for word in ALIASES.get(token, ())]
