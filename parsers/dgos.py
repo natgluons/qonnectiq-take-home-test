@@ -14,3 +14,13 @@ from .common import (
 )
 
 
+def parse_operation(page: fitz.Page, y0: float, y1: float, label: str) -> str:
+    # Source forms contain repeated "Last Ops Update" and "Next Update" overlays.
+    ignored = {
+        "current ops update", "last ops update", "next update",
+        "npt", "current operation @ 0600 hrs :", "last 24 hrs operation",
+        "next 24 hrs operation",
+    }
+    lines = clipped_lines(page, 0, y0, page.rect.width, y1)
+    lines = [s for s in lines if s.lower() not in ignored and label.lower() not in s.lower() and s not in {"@", ":"}]
+    return unique_lines(lines, ignored)
