@@ -78,3 +78,6 @@ FIELDS = {
 }
 
 
+def tokenize(value: str) -> list[str]:
+    return [t for t in re.findall(r"[a-z0-9]+(?:[-_/][a-z0-9]+)*", value.casefold())
+            if t not in STOP and len(t) > 1]
