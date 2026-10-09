@@ -21,3 +21,6 @@ class ChatRequest(BaseModel):
     question: str = Field(min_length=1, max_length=2000)
 
 
+@app.get("/")
+def home():
+    return FileResponse(ROOT / "web" / "index.html")
