@@ -17,3 +17,14 @@ from parsers import parse_ddr, parse_dgos, parse_glossary
 LOG = logging.getLogger("ingest")
 
 
+def classify_pdf(path: Path) -> str:
+    """Identify a report by its document title, not by filename."""
+    with fitz.open(path) as pdf:
+        if not pdf.page_count:
+            raise ValueError("Empty PDF")
+        first = pdf[0].get_text("text").upper()
+    if "DAILY GEOLOGICAL OPERATIONS SUMMARY" in first:
+        return "DGOS"
+    if "DAILY OPERATION REPORT" in first or "DAILY DRILLING REPORT" in first:
+        return "DDR"
+    raise ValueError("Unsupported PDF report layout (expected DGOS or DDR)")
