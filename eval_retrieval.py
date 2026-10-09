@@ -46,3 +46,7 @@ def main():
     print(f"Top-1: {top1}/{len(CASES)}; Recall@3: {top3}/{len(CASES)}; "
           f"Out-of-scope rejected: {refusals}/{len(REFUSALS)}")
     return top1 == len(CASES) and refusals == len(REFUSALS)
+
+
+if __name__ == "__main__":
+    raise SystemExit(0 if main() else 1)
