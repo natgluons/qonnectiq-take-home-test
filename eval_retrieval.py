@@ -28,3 +28,21 @@ def matches(hit, expected):
     section, report_type, report_number = expected
     return (hit["section"].startswith(section) and hit["document_type"] == report_type
             and (report_number is None or hit["report_number"] == report_number))
+
+
+def main():
+    corpus = load_corpus()
+    if not corpus:
+        raise SystemExit("Run python ingest.py first")
+    top1 = top3 = 0
+    for question, section, report_type, report_number in CASES:
+        hits = retrieve(question, corpus)
+        expected = (section, report_type, report_number)
+        rank = next((i + 1 for i, hit in enumerate(hits) if matches(hit, expected)), None)
+        top1 += rank == 1
+        top3 += rank is not None and rank <= 3
+        print(f"{'PASS' if rank == 1 else 'CHECK':5} rank={rank or '-':>2}  {question}")
+    refusals = sum(not retrieve(question, corpus) for question in REFUSALS)
+    print(f"Top-1: {top1}/{len(CASES)}; Recall@3: {top3}/{len(CASES)}; "
+          f"Out-of-scope rejected: {refusals}/{len(REFUSALS)}")
+    return top1 == len(CASES) and refusals == len(REFUSALS)
