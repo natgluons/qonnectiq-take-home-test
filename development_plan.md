@@ -1,14 +1,8 @@
 # Development Plan
 
-## 1. Project Overview
-
-I plan to build a lightweight AI chatbot that allows users to ask questions about Oil & Gas drilling reports in natural language, without having to manually read through technical documents.
-
-The chatbot will support both English and Indonesian, provide answers based on the uploaded documents, and include source references.
-
 My main focus will be **retrieval accuracy, reliable document parsing, and minimizing AI hallucinations**, rather than building a complex interface.
 
-## 2. Implementation Plan
+## 1. Implementation Plan
 
 - **Document Parsing:** Use PyMuPDF to extract information from drilling report PDFs and python-docx to process the glossary. Convert the extracted information into structured JSON while preserving important metadata such as report dates, well names, and source pages.
 - **Reusable Data Ingestion:** Build a simple ingestion script that can process additional PDFs with similar formats using a single command, without modifying the code.
@@ -19,7 +13,7 @@ My main focus will be **retrieval accuracy, reliable document parsing, and minim
 - **Chat Interface:** Build a minimal web interface using FastAPI with basic HTML and JavaScript, keeping most development effort focused on the AI and retrieval components.
 - **Testing & Evaluation:** Use automated tests and sample questions to evaluate retrieval accuracy, response latency, source correctness, and out-of-scope handling.
 
-## 3. Tech Stack & Libraries
+## 2. Tech Stack & Libraries
 
 - **Python:** Main programming language for backend development and data processing.
 - **FastAPI:** REST API and backend service.
@@ -36,13 +30,13 @@ My main focus will be **retrieval accuracy, reliable document parsing, and minim
 - **python-dotenv:** API key and environment configuration.
 - **Pytest + HTTPX:** Automated testing and API testing.
 
-## 4. Technical Approach
+## 3. Technical Approach
 
 I plan to use a **lightweight hybrid retrieval approach**, combining structured field matching, BM25, bilingual keyword matching, metadata filtering, and optional semantic reranking.
 
 I will avoid unnecessary frameworks such as LangChain and external vector databases because the dataset is relatively small. This should keep the application simple, fast, maintainable, and easy to run locally.
 
-## 5. Expected Outcome
+## 4. Expected Outcome
 
 The final MVP should be able to:
 
@@ -53,3 +47,26 @@ The final MVP should be able to:
 - Process new reports with similar formats through a reusable ingestion pipeline.
 - Run locally with straightforward setup instructions.
 - Demonstrate retrieval performance through measurable accuracy and latency evaluations.
+
+## 5. Work Tracking
+
+- **In progress:** Development has started but the feature is not complete.
+- **To do:** Required work that has not started yet.
+- **Backlog:** Optional or future work that is not required for the first working version.
+
+| Priority | Requirement | Status | Planned result |
+|---|---|---|---|
+| P0 | Parse DGOS, DDR, and glossary documents | In progress | Convert supported documents into structured, source-attributed data. |
+| P0 | Reusable one-command ingestion | To do | Process new similarly formatted PDFs without code changes. |
+| P0 | Accurate document-grounded answers | To do | Answer from retrieved evidence and prefer structured facts for direct questions. |
+| P0 | Out-of-scope refusal | To do | Return a consistent refusal when the documents do not contain an answer. |
+| P0 | Source attribution | To do | Return document names, pages, sections, and report dates with answers. |
+| P0 | Response time of no more than three minutes | To do | Measure end-to-end latency and keep every chat response within the required limit. |
+| P0 | From-scratch setup documentation | In progress | Document prerequisites, installation, configuration, ingestion, startup, and testing. |
+| P1 | Retrieval evaluation | To do | Measure Top-1 accuracy, Recall@3, refusal accuracy, source correctness, and latency using labeled questions. |
+| P1 | English and Indonesian queries | To do | Support bilingual keywords and natural-language questions. |
+| P1 | Resolution documentation | To do | Record challenges, implemented solutions, known limitations, and future improvements. |
+| P2 | SQLite storage | Backlog | Optionally store parsed results in SQLite without requiring an external service. JSON remains the MVP storage format. |
+| P2 | PostgreSQL or another external database | Backlog | Only consider this with Docker Compose and simple reviewer setup instructions. |
+
+The P0 requirements are necessary for the MVP. P1 items improve evaluation quality and documentation. P2 items are optional enhancements and should not delay the required functionality.
