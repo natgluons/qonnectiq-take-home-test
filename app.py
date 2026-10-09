@@ -29,3 +29,9 @@ def home():
 @app.get("/app.js")
 def javascript():
     return FileResponse(ROOT / "web" / "app.js", media_type="application/javascript")
+
+
+@app.get("/api/health")
+def health():
+    corpus = load_corpus(os.getenv("PARSED_DATA_DIR", "parsed_data"))
+    return {"documents": len(corpus), "ready": bool(corpus)}
