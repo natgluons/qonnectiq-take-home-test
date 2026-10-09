@@ -66,3 +66,8 @@ def unique_lines(lines: list[str], ignored: set[str] | None = None) -> str:
         seen.add(line)
         result.append(line)
     return clean(" ".join(result))
+
+
+def fields_chunk(data: dict, fields: list[str] | None = None) -> str:
+    fields = fields or list(data)
+    return "; ".join(f"{k}: {data[k]}" for k in fields if data.get(k) is not None)
