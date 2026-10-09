@@ -24,3 +24,7 @@ REFUSALS = [
 ]
 
 
+def matches(hit, expected):
+    section, report_type, report_number = expected
+    return (hit["section"].startswith(section) and hit["document_type"] == report_type
+            and (report_number is None or hit["report_number"] == report_number))
