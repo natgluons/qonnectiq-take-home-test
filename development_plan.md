@@ -50,19 +50,21 @@ The final MVP should be able to:
 
 ## 5. Work Tracking
 
+- **Done:** Implementation and its required validation are complete.
 - **In progress:** Development has started but the feature is not complete.
 - **To do:** Required work that has not started yet.
 - **Backlog:** Optional or future work that is not required for the first working version.
 
 | Priority | Requirement | Status | Planned result |
 |---|---|---|---|
-| P0 | Parse DGOS, DDR, and glossary documents | In progress | Convert supported documents into structured, source-attributed data. |
-| P0 | Reusable one-command ingestion | To do | Process new similarly formatted PDFs without code changes. |
+| P0 | Parse DGOS, DDR, and glossary documents | In progress | Parser implementation is complete; functional and integration validation are still pending. |
+| P0 | Reusable one-command ingestion | In progress | The ingestion command is implemented; runtime validation with PyMuPDF and sample documents is still pending. |
 | P0 | Accurate document-grounded answers | To do | Answer from retrieved evidence and prefer structured facts for direct questions. |
 | P0 | Out-of-scope refusal | To do | Return a consistent refusal when the documents do not contain an answer. |
 | P0 | Source attribution | To do | Return document names, pages, sections, and report dates with answers. |
 | P0 | Response time of no more than three minutes | To do | Measure end-to-end latency and keep every chat response within the required limit. |
 | P0 | From-scratch setup documentation | In progress | Document prerequisites, installation, configuration, ingestion, startup, and testing. |
+| P1 | Optional semantic embeddings | In progress | Cache building, cache loading, and question embedding are implemented; integration validation is still pending. |
 | P1 | Retrieval evaluation | To do | Measure Top-1 accuracy, Recall@3, refusal accuracy, source correctness, and latency using labeled questions. |
 | P1 | English and Indonesian queries | To do | Support bilingual keywords and natural-language questions. |
 | P1 | Resolution documentation | To do | Record challenges, implemented solutions, known limitations, and future improvements. |

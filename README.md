@@ -45,7 +45,7 @@ copy .env.example .env
 Add the reviewer-provided API key to `.env`:
 
 ```dotenv
-OPENAI_API_KEY=your-openai-api-key
+OPENAI_API_KEY=openai-api-key
 OPENAI_MODEL=gpt-4o-mini
 PARSED_DATA_DIR=parsed_data
 ```
