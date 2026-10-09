@@ -37,3 +37,8 @@ def test_planned_wireline():
     hits = retrieve("Wireline run apa yang direncanakan?", CORPUS)
     assert hits[0]["section"] == "next_24h_operation"
     assert "PEX-QAIT" in hits[0]["text"]
+
+
+def test_glossary():
+    hits = retrieve("What does BHA mean?", CORPUS)
+    assert hits[0]["section"] == "glossary:BHA"
