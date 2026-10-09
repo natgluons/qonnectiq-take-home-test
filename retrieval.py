@@ -176,3 +176,12 @@ def _mentioned_date(question: str) -> str | None:
                 except ValueError:
                     return None
     return None
+
+
+def _scope(question: str, corpus: list[dict]) -> tuple[str | None, int | None, str | None]:
+    # Do not confuse WL Run #1 with report number 1.
+    number = re.search(r"\b(?:report|laporan)(?:\s+(?:no\.?|number))?\s*#?\s*(\d{1,4})\b", question, re.I)
+    date = _mentioned_date(question)
+    wells = sorted({x["well_name"] for x in corpus if x.get("well_name")}, key=len, reverse=True)
+    name = next((well for well in wells if well.lower() in question.lower()), None)
+    return date, int(number.group(1)) if number else None, name
