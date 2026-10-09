@@ -70,3 +70,32 @@ def run(input_dir: Path, output_dir: Path) -> dict:
             LOG.error("Unable to ingest %s: %s", path.name, exc)
             failures.append({"filename": path.name, "error": str(exc)})
     return {"files_created": created, "errors": failures}
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--input", type=Path, default=Path("datasets"))
+    parser.add_argument("--output", type=Path, default=Path("parsed_data"))
+    parser.add_argument("--embed", action="store_true", help="Also build cached OpenAI embeddings for hybrid retrieval")
+    args = parser.parse_args()
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
+    try:
+        result = run(args.input, args.output)
+    except (ValueError, FileNotFoundError) as exc:
+        LOG.error("%s", exc)
+        return 1
+    print(f"Generated {len(result['files_created'])} JSON file(s)")
+    if args.embed and result["files_created"] and not result["errors"]:
+        try:
+            from dotenv import load_dotenv
+            load_dotenv()
+            from embeddings import build_embedding_cache
+            count = build_embedding_cache(args.output)
+            print(f"Semantic search: {count} new evidence embeddings cached")
+        except Exception as exc:
+            LOG.error("Embedding generation failed: %s", type(exc).__name__)
+            return 1
+    if result["errors"]:
+        print(f"Errors: {len(result['errors'])}. See messages above.", file=sys.stderr)
+        return 1
+    return 0
