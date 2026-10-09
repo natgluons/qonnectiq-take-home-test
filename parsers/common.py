@@ -46,3 +46,10 @@ def normalized_pages(pdf: fitz.Document) -> list[dict[str, Any]]:
         {"page": i + 1, "text": pdf[i].get_text("text", sort=True)}
         for i in range(len(pdf))
     ]
+
+
+def clipped_lines(page: fitz.Page, x0: float, y0: float, x1: float, y1: float) -> list[str]:
+    """Extract an area without the destructive text mixing of PDF row sorting."""
+    rect = fitz.Rect(x0, y0, x1, y1)
+    lines = [clean(x) for x in page.get_text("text", clip=rect, sort=False).splitlines()]
+    return [x for x in lines if x]
