@@ -13,6 +13,7 @@ from pathlib import Path
 
 import fitz
 from parsers import parse_ddr, parse_dgos, parse_glossary
+from storage import replace_corpus
 
 LOG = logging.getLogger("ingest")
 
@@ -36,7 +37,7 @@ def output_name(path: Path, root: Path) -> str:
     return re.sub(r"[^\w-]+", "_", relative).strip("_") + ".json"
 
 
-def run(input_dir: Path, output_dir: Path) -> dict:
+def run(input_dir: Path, output_dir: Path, database_path: Path | None = None) -> dict:
     if not input_dir.is_dir():
         raise FileNotFoundError(f"Input folder doesn't exist: {input_dir}")
     candidates = sorted(
@@ -46,9 +47,11 @@ def run(input_dir: Path, output_dir: Path) -> dict:
     )
     if not candidates:
         raise ValueError(f"No .pdf or .docx input files found in {input_dir}")
-    output_dir.mkdir(parents=True, exist_ok=True)
+    if database_path is None:
+        output_dir.mkdir(parents=True, exist_ok=True)
     created: list[str] = []
     failures: list[dict] = []
+    documents: list[dict] = []
     for path in candidates:
         try:
             if path.suffix.lower() == ".docx":
@@ -59,32 +62,48 @@ def run(input_dir: Path, output_dir: Path) -> dict:
             else:
                 kind = classify_pdf(path)
                 parsed = parse_dgos(path) if kind == "DGOS" else parse_ddr(path)
-            target = output_dir / output_name(path, input_dir)
-            # Atomic replace prevents truncated JSON when an ingestion is retried.
-            tmp = target.with_suffix(".json.tmp")
-            tmp.write_text(json.dumps(parsed, indent=2, ensure_ascii=False), encoding="utf-8")
-            tmp.replace(target)
-            LOG.info("%-8s %-62s -> %s", parsed["document_type"], path.name, target.name)
-            created.append(str(target))
+            documents.append(parsed)
+            if database_path is None:
+                target = output_dir / output_name(path, input_dir)
+                # Atomic replace prevents truncated JSON when an ingestion is retried.
+                tmp = target.with_suffix(".json.tmp")
+                tmp.write_text(json.dumps(parsed, indent=2, ensure_ascii=False), encoding="utf-8")
+                tmp.replace(target)
+                LOG.info("%-8s %-62s -> %s", parsed["document_type"], path.name, target.name)
+                created.append(str(target))
+            else:
+                LOG.info("%-8s %s", parsed["document_type"], path.name)
         except (ValueError, RuntimeError, OSError, KeyError) as exc:
             LOG.error("Unable to ingest %s: %s", path.name, exc)
             failures.append({"filename": path.name, "error": str(exc)})
-    return {"files_created": created, "errors": failures}
+    database = None
+    if database_path is not None:
+        replace_corpus(database_path, documents)
+        database = str(database_path)
+        LOG.info("SQLITE  %-62s <- %d document(s)", database_path, len(documents))
+    return {"files_created": created, "database": database, "errors": failures}
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", type=Path, default=Path("datasets"))
     parser.add_argument("--output", type=Path, default=Path("parsed_data"))
+    parser.add_argument("--database", type=Path,
+                        help="Store in SQLite instead of JSON, for example parsed_data/corpus.db")
     parser.add_argument("--embed", action="store_true", help="Also build cached OpenAI embeddings for hybrid retrieval")
     args = parser.parse_args()
+    if args.database and args.embed:
+        parser.error("--embed currently requires the default JSON storage mode")
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     try:
-        result = run(args.input, args.output)
+        result = run(args.input, args.output, args.database)
     except (ValueError, FileNotFoundError) as exc:
         LOG.error("%s", exc)
         return 1
-    print(f"Generated {len(result['files_created'])} JSON file(s)")
+    if result["database"]:
+        print(f"Stored parsed corpus in SQLite: {result['database']}")
+    else:
+        print(f"Generated {len(result['files_created'])} JSON file(s)")
     if args.embed and result["files_created"] and not result["errors"]:
         try:
             from dotenv import load_dotenv

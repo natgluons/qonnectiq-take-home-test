@@ -13,6 +13,8 @@ from datetime import datetime
 from hashlib import sha256
 from pathlib import Path
 
+from storage import load_sqlite_corpus
+
 STOP = set("""apa apakah adalah yang ini itu nya di dimana letak berapa bagaimana siapa
 kapan dari dan atau untuk pada dalam tentang berdasarkan data sumur well wellnya
 what which who when where is are was were the a an of in on at for to
@@ -89,8 +91,11 @@ def query_tokens(value: str) -> list[str]:
 
 
 def load_corpus(folder: str | Path = "parsed_data") -> list[dict]:
+    source = Path(folder)
+    if source.suffix.lower() in {".db", ".sqlite", ".sqlite3"}:
+        return load_sqlite_corpus(source)
     docs = []
-    for path in sorted(Path(folder).glob("*.json")):
+    for path in sorted(source.glob("*.json")):
         try:
             parsed = json.loads(path.read_text(encoding="utf8"))
         except (OSError, ValueError):

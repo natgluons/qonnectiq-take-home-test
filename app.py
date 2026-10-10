@@ -17,6 +17,10 @@ app = FastAPI(title="Well Report AI", version="1.0.0")
 ROOT = Path(__file__).resolve().parent
 
 
+def corpus_source() -> str:
+    return os.getenv("CORPUS_DATABASE") or os.getenv("PARSED_DATA_DIR", "parsed_data")
+
+
 class ChatRequest(BaseModel):
     question: str = Field(min_length=1, max_length=2000)
 
@@ -33,15 +37,15 @@ def javascript():
 
 @app.get("/api/health")
 def health():
-    corpus = load_corpus(os.getenv("PARSED_DATA_DIR", "parsed_data"))
+    corpus = load_corpus(corpus_source())
     return {"documents": len(corpus), "ready": bool(corpus)}
 
 
 @app.post("/api/chat")
 def chat(request: ChatRequest):
-    # Reload the JSON each request: a newly ingested PDF is immediately searchable
-    # without a server restart or an extra database / indexing service.
-    corpus = load_corpus(os.getenv("PARSED_DATA_DIR", "parsed_data"))
+    # Reload the configured corpus each request so newly ingested documents are
+    # searchable without restarting the server.
+    corpus = load_corpus(corpus_source())
     if not corpus:
         raise HTTPException(503, "No documents indexed. Run: python ingest.py")
     try:
