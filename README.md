@@ -1,9 +1,9 @@
-# Qonnectiq Take Home Test
+# Qonnectiq AI Engineer Task / Take Home Test - Candidate: Kristy Natasha Yohanes
 
 ### Project Overview
-Lightweight AI chatbot that allows users to ask questions about Oil & Gas drilling reports in natural language, without having to manually read through technical documents. The chatbot will support both English and Indonesian, provide answers based on the uploaded documents, and include source references.
+For this task, following the requirement, I made a lightweight AI chatbot that allows users to ask questions about Oil & Gas drilling reports in natural language, without having to manually read through technical documents. The chatbot will support both English and Indonesian, provide answers based on the uploaded documents, and include source references.
 
-#### **Important Note:** The development approach, technology choices, expected outcomes, work tracking, and MVP priorities are documented in [development_plan.md](development_plan.md).
+#### **Important Note:** The development approach, technology choices, expected outcomes, work tracking, and MVP priorities are documented in [docs/development_plan.md](docs/development_plan.md) and project report in [docs/report_indonesian.md](docs/report_indonesian.md).
 
 ### Prerequisites
 
@@ -79,12 +79,30 @@ To build the optional semantic embedding cache:
 python ingest.py --embed
 ```
 
+JSON remains the default and simplest storage format. To store the parsed
+corpus in SQLite instead for a particular ingestion run:
+
+```bash
+python ingest.py --database parsed_data/corpus.db
+```
+
+In SQLite mode, the command replaces the database corpus atomically and does
+not create JSON document files for that run. SQLite uses Python's standard
+library and requires no additional service.
+
 ### Run the Chat Application
 
 Start the API and browser interface:
 
 ```bash
 uvicorn app:app --reload
+```
+
+By default, the API reads JSON from `PARSED_DATA_DIR`. To use SQLite, add this
+to `.env` before starting the application:
+
+```dotenv
+CORPUS_DATABASE=parsed_data/corpus.db
 ```
 
 Open `http://127.0.0.1:8000/`. The JSON API accepts `POST /api/chat` with `{"question": "What does BHA mean?"}`. Use `GET /api/health` to check whether parsed documents are available.
@@ -109,7 +127,7 @@ PDF / DOCX
 ```
 
 - **Parsing:** PyMuPDF processes DGOS and DDR PDFs, while python-docx reads glossary tables. Original page text and source metadata are preserved for retrieval and citations.
-- **Storage:** JSON is used for the MVP because the corpus is small and the assignment requires no external service. SQLite remains a backlog enhancement.
+- **Storage:** JSON is the portable default. SQLite is an optional, zero-service backend built with Python's standard library and stores the same parsed document records with indexed metadata.
 - **Retrieval:** Structured field matching, bilingual keyword expansion, BM25, date and report-number filtering, and optional embedding reranking identify relevant evidence.
 - **Answering:** Direct factual matches are returned without an LLM call. Other supported questions use GPT-4o-mini with only retrieved evidence in the prompt.
 - **Interface:** FastAPI serves both the JSON API and the small browser client, avoiding a separate frontend toolchain.
@@ -140,7 +158,7 @@ Each parsed report produces one JSON file. Missing values use `null` rather than
 }
 ```
 
-DDR records use the same source metadata and include fields such as `cumulative_npt_hours`, `daily_npt_hours`, `measured_depth_m`, and `cumulative_cost_usd`. Glossary records contain `terms` with a term, meaning, and confirmation flag. Optional embeddings are stored separately in `parsed_data/embeddings.json`.
+DDR records use the same source metadata and include fields such as `cumulative_npt_hours`, `daily_npt_hours`, `measured_depth_m`, and `cumulative_cost_usd`. Glossary records contain `terms` with a term, meaning, and confirmation flag. Optional embeddings are stored separately in `parsed_data/embeddings.json`. When SQLite is enabled, each complete parsed document is stored in the `documents` table alongside indexed document type, date, report number, and well name metadata.
 
 ## Resolution, Limitations, and Future Work
 
@@ -152,11 +170,9 @@ DDR records use the same source metadata and include fields such as `cumulative_
 | Missing or unrelated information | Use evidence thresholds and a consistent refusal response. | Measure refusal precision and recall on a larger test set. |
 | Scanned or image-only PDFs | Not supported in this MVP. | Add OCR and validate it against scanned samples. |
 | Broader semantic retrieval | Provide optional OpenAI embedding reranking. | Consider a reranker only if evaluation results justify it. |
-| Database persistence | Keep parsed output in local JSON files. | Add SQLite without requiring extra infrastructure. |
+| Database persistence | Provide JSON by default and optional SQLite persistence without extra infrastructure. | Add migrations only if the schema grows beyond this MVP. |
 
 ## Security and Submission Notes
 
-- Never commit `.env`, API keys, source datasets, parsed JSON, or generated embeddings.
-- Reviewers should use their own OpenAI API key.
-- Confirm that source reports may be sent to OpenAI before enabling chat generation or semantic embeddings.
-- This application is an assessment MVP and is not intended for production drilling decisions.
+I made sure to not commit .env, API keys, source datasets, parsed JSON, or generated embeddings. This is still an MVP, I made it to fit the current limited & small dataset, it can still be developed further depending on further requirement & updated dataset. I hope this is clear enough. I'm looking forward to work with Qonnectiq, thank you.
+

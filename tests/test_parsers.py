@@ -97,6 +97,24 @@ def test_one_command_ingestion(tmp_path):
     assert (output / "Glossaries.json").is_file()
 
 
+def test_sqlite_ingestion_is_an_alternative_to_json(tmp_path):
+    inputs = tmp_path / "datasets"
+    inputs.mkdir()
+    doc = Document()
+    table = doc.add_table(rows=1, cols=2)
+    table.add_row().cells[0].text = "NPT"
+    table.rows[1].cells[1].text = "Non Productive Time"
+    doc.save(inputs / "Glossaries.docx")
+    output = tmp_path / "parsed_data"
+    database = output / "corpus.db"
+    result = run(inputs, output, database)
+    assert not result["errors"]
+    assert result["files_created"] == []
+    assert result["database"] == str(database)
+    assert database.is_file()
+    assert not (output / "Glossaries.json").exists()
+
+
 @pytest.mark.parametrize("suffix,report_type", [
     ("BARAKUDA-1_DGOS_72_20260829.pdf", "DGOS"),
     ("BARAKUDA-1_DGOS_84_20260910.pdf", "DGOS"),

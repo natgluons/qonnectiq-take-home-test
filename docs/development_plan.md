@@ -68,7 +68,7 @@ The final MVP should be able to:
 | P1 | Retrieval evaluation | To do | Measure Top-1 accuracy, Recall@3, refusal accuracy, source correctness, and latency using labeled questions. |
 | P1 | English and Indonesian queries | To do | Support bilingual keywords and natural-language questions. |
 | P1 | Resolution documentation | To do | Record challenges, implemented solutions, known limitations, and future improvements. |
-| P2 | SQLite storage | Backlog | Optionally store parsed results in SQLite without requiring an external service. JSON remains the MVP storage format. |
+| P2 | SQLite storage | Done | Optional SQLite persistence is implemented and validated. JSON remains the default format. |
 | P2 | PostgreSQL or another external database | Backlog | Only consider this with Docker Compose and simple reviewer setup instructions. |
 
 The P0 requirements are necessary for the MVP. P1 items improve evaluation quality and documentation. P2 items are optional enhancements and should not delay the required functionality.

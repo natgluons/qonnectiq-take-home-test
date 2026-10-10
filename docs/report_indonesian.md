@@ -2,13 +2,12 @@
 
 ## 1. Cara Kerja Sistem
 
-- **Document Parsing**: PDF laporan dan DOCX glosarium dibaca dan diubah menjadi data JSON terstruktur.
-- **Information Retrieval**: Pertanyaan pengguna dicocokkan dengan informasi yang paling relevan menggunakan kombinasi pencarian berbasis kata kunci, konteks, dan metadata.
+- **Document Parsing**: PDF laporan dan DOCX glosarium dibaca dan diubah menjadi structured data JSON.
+- **Information Retrieval**: Pertanyaan pengguna dicocokkan dengan informasi yang paling relevan menggunakan kombinasi pencarian berbasis keywords, konteks, dan metadata.
 - **AI Answer Generation**: Informasi yang ditemukan digunakan sebagai dasar jawaban. Pertanyaan dengan jawaban numerik tertentu dapat dijawab langsung dari data untuk mengurangi risiko kesalahan AI.
 - **Source Attribution**: Jawaban disertai referensi dokumen dan halaman yang digunakan.
 - **Out-of-Scope Handling**: Pertanyaan yang tidak didukung dokumen ditolak secara konsisten.
-
-Sistem juga mendukung penambahan PDF baru dengan format serupa melalui satu perintah, tanpa perlu mengubah kode.
+- MVP-nya mendukung penambahan PDF baru juga dengan format serupa.
 
 ## 2. Stacks & Tools
 
@@ -81,4 +80,6 @@ Ketiga jawaban tersebut berhasil diperoleh langsung dari dokumen yang relevan ta
 - Seluruh 9 pertanyaan evaluasi retrieval berhasil menemukan sumber yang tepat pada peringkat pertama, dengan waktu pencarian median sekitar 3,72 milidetik pada pengujian lokal.
 - Hasil ini menunjukkan bahwa pendekatan retrieval yang sederhana tetapi terstruktur dapat bekerja dengan baik pada dataset awal, tanpa memerlukan fine-tuning, vector database, atau arsitektur AI yang kompleks.
 
-Prioritas pengembangan berikutnya adalah pengujian pada dokumen baru, validasi jawaban LLM secara end-to-end, dan evaluasi kualitas retrieval dengan pertanyaan yang lebih beragam.
+### Catatan Storage
+
+JSON tetap menjadi pilihan default karena paling sederhana, mudah diperiksa, dan sudah cukup untuk ukuran dataset MVP. Tapi SQLite juga disediakan sebagai pilihan opsional apabila hasil parsing ingin disimpan dalam database tanpa menambah layanan atau proses setup lain. Saat proses ingestion, pengguna dapat memilih outputnya (JSON atau SQLite) sesuai kebutuhan.

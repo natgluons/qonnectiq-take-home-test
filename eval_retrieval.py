@@ -3,6 +3,8 @@
 Run after ingestion: python eval_retrieval.py
 Measures whether the correct evidence appears at rank 1 and in top 3.
 """
+import os
+
 from retrieval import load_corpus, retrieve
 
 # Labels indicate relevant DOCUMENT/SECTION, not answers prewritten in code.
@@ -31,7 +33,7 @@ def matches(hit, expected):
 
 
 def main():
-    corpus = load_corpus()
+    corpus = load_corpus(os.getenv("CORPUS_DATABASE") or "parsed_data")
     if not corpus:
         raise SystemExit("Run python ingest.py first")
     top1 = top3 = 0
