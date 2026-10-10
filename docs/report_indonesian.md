@@ -79,3 +79,7 @@ Ketiga jawaban tersebut berhasil diperoleh langsung dari dokumen yang relevan ta
 - MVP berhasil mengimplementasikan alur pemrosesan dokumen, pencarian informasi, dan penyediaan jawaban berbasis sumber.
 - Seluruh 9 pertanyaan evaluasi retrieval berhasil menemukan sumber yang tepat pada peringkat pertama, dengan waktu pencarian median sekitar 3,72 milidetik pada pengujian lokal.
 - Hasil ini menunjukkan bahwa pendekatan retrieval yang sederhana tetapi terstruktur dapat bekerja dengan baik pada dataset awal, tanpa memerlukan fine-tuning, vector database, atau arsitektur AI yang kompleks.
+
+### Catatan Pilihan Penyimpanan
+
+JSON tetap menjadi pilihan default karena paling sederhana, mudah diperiksa, dan sudah cukup untuk ukuran dataset MVP. SQLite juga disediakan sebagai pilihan opsional apabila hasil parsing ingin disimpan dalam database tanpa menambah layanan atau proses setup lain. Pada satu proses ingestion, pengguna dapat memilih output JSON atau SQLite sesuai kebutuhan.
