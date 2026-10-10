@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Well Report AI</title>
+  <style>
+    :root{font-family:system-ui,Arial,sans-serif;color:#e8edf4;background:#0f1724;font-size:15px}
+    *{box-sizing:border-box}body{margin:0;padding:0 14px}
+    main{max-width:780px;margin:36px auto}h1{margin-bottom:4px;font-size:1.65rem}
+    .hint,.meta{color:#98a8bd;font-size:.88rem}.hint{margin-bottom:26px}
+    #chat{min-height:220px;display:flex;flex-direction:column;gap:14px;padding-bottom:20px}
+    .message{white-space:pre-wrap;line-height:1.55;padding:14px 16px;border:1px solid #354256;border-radius:12px;max-width:92%}
+    .user{align-self:end;background:#243c62}.assistant{align-self:start;background:#192435}
+    .sources{margin-top:12px;font-size:.78rem;color:#a8c1e2;white-space:normal}
+    form{display:flex;gap:8px;position:sticky;bottom:0;background:#0f1724;padding:18px 0 30px}
+    input{flex:1;min-width:0;border-radius:8px;border:1px solid #495a71;padding:13px;background:#1a2637;color:#fff;font:inherit}
+    button{border:0;border-radius:8px;padding:0 18px;background:#478be8;color:#fff;cursor:pointer;font:inherit}
+    button:disabled{opacity:.5;cursor:wait}
+  </style>
+</head>
+<body><main>
+  <h1>Well Report AI</h1>
+  <p class="hint">Document-grounded answers with source references · DDR, DGOS, Oil & Gas glossary</p>
+  <div id="chat" aria-live="polite"></div>
+  <form id="question-form"><input id="question" placeholder="Ask about a well report or drilling term…" required autocomplete="off" autofocus><button id="send">Ask</button></form>
+  <p id="status" class="meta"></p>
+</main><script src="/app.js"></script></body></html>
