@@ -53,3 +53,5 @@ form.addEventListener('submit', async (event) => {
 });
 
 fetch('/api/health').then(r => r.json()).then(data => {
+  status.textContent = `${data.documents} document(s) indexed. Add documents to datasets/ and run python ingest.py to refresh.`;
+}).catch(() => {});
