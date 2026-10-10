@@ -26,3 +26,30 @@ function message(role, text, sources = []) {
   bubble.scrollIntoView({behavior: 'smooth', block: 'end'});
   return bubble;
 }
+
+form.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const question = field.value.trim();
+  if (!question) return;
+  field.value = '';
+  send.disabled = true;
+  message('user', question);
+  const pending = message('assistant', 'Searching source documents…');
+  try {
+    const response = await fetch('/api/chat', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({question}),
+    });
+    const data = await response.json();
+    pending.remove();
+    message('assistant', response.ok ? data.answer : (data.detail || 'Request failed.'), response.ok ? data.sources : []);
+  } catch {
+    pending.remove();
+    message('assistant', 'Unable to reach the server.');
+  } finally {
+    send.disabled = false;
+    field.focus();
+  }
+});
+
+fetch('/api/health').then(r => r.json()).then(data => {
