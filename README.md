@@ -1,9 +1,9 @@
-# Qonnectiq Take Home Test
+# Qonnectiq AI Engineer Task / Take Home Test - Candidate: Kristy Natasha Yohanes
 
 ### Project Overview
-Lightweight AI chatbot that allows users to ask questions about Oil & Gas drilling reports in natural language, without having to manually read through technical documents. The chatbot will support both English and Indonesian, provide answers based on the uploaded documents, and include source references.
+For this task, following the requirement, I made a lightweight AI chatbot that allows users to ask questions about Oil & Gas drilling reports in natural language, without having to manually read through technical documents. The chatbot will support both English and Indonesian, provide answers based on the uploaded documents, and include source references.
 
-#### **Important Note:** The development approach, technology choices, expected outcomes, work tracking, and MVP priorities are documented in [development_plan.md](development_plan.md).
+#### **Important Note:** The development approach, technology choices, expected outcomes, work tracking, and MVP priorities are documented in [docs/development_plan.md](docs/development_plan.md) and project report in [docs/report_indonesian.md](docs/report_indonesian.md).
 
 ### Prerequisites
 
@@ -156,7 +156,5 @@ DDR records use the same source metadata and include fields such as `cumulative_
 
 ## Security and Submission Notes
 
-- Never commit `.env`, API keys, source datasets, parsed JSON, or generated embeddings.
-- Reviewers should use their own OpenAI API key.
-- Confirm that source reports may be sent to OpenAI before enabling chat generation or semantic embeddings.
-- This application is an assessment MVP and is not intended for production drilling decisions.
+I made sure to not commit .env, API keys, source datasets, parsed JSON, or generated embeddings. This is still an MVP, I made it to fit the current limited & small dataset, it can still be developed further depending on further requirement & updated dataset. I hope this is clear enough. I'm looking forward to work with Qonnectiq, thank you.
+
